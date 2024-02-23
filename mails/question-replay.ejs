@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Replay Notification</title>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        min-width: 100%;
+        font-family: "Arial", sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        background: #fafafa;
+        color: #000;
+      }
+      h1 {
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 1.25;
+        margin-top: 0;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+      p {
+        margin-top: 0;
+        margin-bottom: 24px;
+      }
+      .email-header {
+        color: #ffffff;
+        padding: 24px;
+        background: #0f0c29; /* fallback for old browsers */
+        background: -webkit-linear-gradient(
+          to right,
+          #24243e,
+          #302b63,
+          #0f0c29
+        ); /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(
+          to right,
+          #24243e,
+          #302b63,
+          #0f0c29
+        ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+      }
+      .email-body {
+        padding: 24px;
+        background-color: #ffffff;
+      }
+      span {
+        color: #302b63;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="email-header">E-Learning</h1>
+    <div class="email-body">
+      <h2>Hello <span><%= name %>,</span></h2>
+      <p>
+        A new replay has been added to your question in the video
+        <span>"<%= title %>"</span>.
+      </p>
+      <p>
+        Please login to our website to view the replay and continue the
+        discussion.
+      </p>
+      <p>Thank you for being a part of our community</p>
+    </div>
+  </body>
+</html>

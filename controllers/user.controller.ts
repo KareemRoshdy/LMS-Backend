@@ -301,20 +301,20 @@ interface IUpdateUserInfo {
 export const updateUserInfo = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { email, name } = req.body as IUpdateUserInfo;
+      const { name } = req.body as IUpdateUserInfo;
 
       const userId = req.user?._id;
       const user = await userModel.findById(userId);
 
-      if (email && user) {
-        const isEmailExist = await userModel.findOne({ email });
+      // if (email && user) {
+      //   const isEmailExist = await userModel.findOne({ email });
 
-        if (isEmailExist) {
-          return next(new ErrorHandler("Email is already exist", 400));
-        }
+      //   if (isEmailExist) {
+      //     return next(new ErrorHandler("Email is already exist", 400));
+      //   }
 
-        user.email = email;
-      }
+      //   user.email = email;
+      // }
 
       if (name && user) {
         user.name = name;
@@ -395,13 +395,30 @@ export const updateProfilePicture = CatchAsyncError(
         // If User Have An Avatar
         if (user?.avatar?.public_id) {
           // First Delete The Old Avatar From Cloudinary
-          deletePicture(user?.avatar?.public_id);
+          const avatarId = user?.avatar?.public_id;
+          await cloudinary.v2.uploader.destroy(avatarId);
 
           // Second Add A New Avatar T0 Cloudinary
-          uploadPicture(avatar, user);
+          const myCloud = await cloudinary.v2.uploader.upload(avatar, {
+            folder: "avatars",
+            width: 150,
+          });
+
+          user.avatar = {
+            public_id: myCloud.public_id,
+            url: myCloud.secure_url,
+          };
         } else {
           // If User Doesn't Have An Avatar
-          uploadPicture(avatar, user);
+          const myCloud = await cloudinary.v2.uploader.upload(avatar, {
+            folder: "avatars",
+            width: 150,
+          });
+
+          user.avatar = {
+            public_id: myCloud.public_id,
+            url: myCloud.secure_url,
+          };
         }
       }
 

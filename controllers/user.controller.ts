@@ -453,8 +453,11 @@ export const getAllUsers = CatchAsyncError(
 export const updateUserRole = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { id, role } = req.body;
-      updateUserRoleService(res, id, role);
+      const { email, role } = req.body;
+      const userId = await userModel.findOne({ email });
+      console.log(userId?._id, role);
+
+      updateUserRoleService(res, userId?._id, role);
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 500));
     }

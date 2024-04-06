@@ -128,11 +128,12 @@ export const getAllCourses = CatchAsyncError(
       const isCacheExist = await redis.get("allCourses");
 
       if (isCacheExist) {
-        const course = JSON.parse(isCacheExist);
-        res.status(200).json({
-          success: true,
-          course,
-        });
+        // const course = JSON.parse(isCacheExist);
+        getAllCoursesServices(res);
+        // res.status(200).json({
+        //   success: true,
+        //   course,
+        // });
       } else {
         const courses = await CourseModel.find().select(
           "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"

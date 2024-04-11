@@ -95,26 +95,35 @@ export const getSingleCourse = CatchAsyncError(
     try {
       const courseId = req.params.id;
 
-      const isCacheExist = await redis.get(courseId);
+      const course = await CourseModel.findById(courseId).select(
+        "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
+      );
 
-      if (isCacheExist) {
-        const course = JSON.parse(isCacheExist);
-        res.status(200).json({
-          success: true,
-          course,
-        });
-      } else {
-        const course = await CourseModel.findById(req.params.id).select(
-          "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
-        );
+      await redis.set(courseId, JSON.stringify(course), "EX", 604800); // 7days
 
-        await redis.set(courseId, JSON.stringify(course), "EX", 604800); // 7days
+      res.status(200).json({
+        success: true,
+        course,
+      });
+      // const isCacheExist = await redis.get(courseId);
+      // if (isCacheExist) {
+      //   const course = JSON.parse(isCacheExist);
+      //   res.status(200).json({
+      //     success: true,
+      //     course,
+      //   });
+      // } else {
+      //   const course = await CourseModel.findById(courseId).select(
+      //     "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
+      //   );
 
-        res.status(200).json({
-          success: true,
-          course,
-        });
-      }
+      //   await redis.set(courseId, JSON.stringify(course), "EX", 604800); // 7days
+
+      //   res.status(200).json({
+      //     success: true,
+      //     course,
+      //   });
+      // }
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 500));
     }
@@ -278,6 +287,8 @@ export const addAnswer = CatchAsyncError(
       const newAnswer: any = {
         user: req.user,
         answer,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       // Add this answer to our course content
@@ -306,7 +317,7 @@ export const addAnswer = CatchAsyncError(
         try {
           await sendMail({
             email: question.user.email,
-            subject: "Question Replay",
+            subject: "Question Reply",
             template: "question-replay.ejs",
             data,
           });
@@ -374,12 +385,14 @@ export const addReview = CatchAsyncError(
 
       await course?.save();
 
-      const notification = {
+      await redis.set(courseId, JSON.stringify(course), "EX", 605800); // 7 days
+
+      // Create notification
+      await NotificationModel.create({
+        user: req.user?._id,
         title: "New Review Received",
         message: `${req.user?.name} has given a review in ${course?.name}`,
-      };
-
-      // TODO - Create notification
+      });
 
       res.status(200).json({
         success: true,
@@ -417,18 +430,22 @@ export const addReplayToReview = CatchAsyncError(
         return next(new ErrorHandler("Review not found", 404));
       }
 
-      const replayData: any = {
+      const replyData: any = {
         user: req.user,
         comment,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       if (!review.commentReplies) {
         review.commentReplies = [];
       }
 
-      review.commentReplies?.push(replayData);
+      review.commentReplies?.push(replyData);
 
       await course?.save();
+
+      await redis.set(courseId, JSON.stringify(course), "EX", 605800); // 7 days
 
       res.status(200).json({
         success: true,

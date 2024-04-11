@@ -61,7 +61,7 @@ courseRouter.put(
 );
 
 courseRouter.put(
-  "/add-replay",
+  "/add-reply",
   updateAccessToken,
   isAuthenticated,
   authorizeRoles("admin"),
